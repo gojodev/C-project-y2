@@ -213,6 +213,7 @@ int main(int argc, char *argv[]) {
             connections[i] = crt->connections[i]->planet_id;
         }
         double crt_dist = get_distance(crt->point, treasure->point);
+        printf("\ncrt_dist: %d", crt_dist); // ! DEBUG
         ShipAction next_action = space_hop(crt_id,
                                         connections,
                                         crt->num_connections,
@@ -243,8 +244,8 @@ int main(int argc, char *argv[]) {
                     crt = next;
                 }
             }
-        }
-        if (crt == treasure){
+        }   
+        if (crt == treasure || crt_dist == 0){
             found_treasure = 1;
             break;
         }
