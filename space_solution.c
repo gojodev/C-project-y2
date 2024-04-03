@@ -1,91 +1,112 @@
 #include "space_explorer.h"
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 
-typedef struct
+typedef struct ship_state
 {
     unsigned int *visited;
-    int num_visited;
-    int capacity;
+    unsigned int jumpNo;
+    unsigned int allPlanets;
+    double prevDist;
+
+    unsigned int *candPlanets;
+    unsigned int *candDists;
+    unsigned int candIndex;
+    unsigned int candConn;
 } ShipState;
 
-ShipState *init_ship_state()
-{
-    ShipState *state = malloc(sizeof(ShipState));
-    state->capacity = 10; // Initial capacity
-    state->visited = malloc(sizeof(unsigned int) * state->capacity);
-    state->num_visited = 0;
-    return state;
-}
+#define MAX_PLANETS 500 // for the sake for argument allocated space for 500 planets should be more than enough
 
-int is_visited(ShipState *state, unsigned int planet_id)
+unsigned int is_visited(unsigned int planet_id, ShipState *state)
 {
-    for (int i = 0; i < state->num_visited; ++i)
+    for (int i = 0; i < state->allPlanets; i++)
     {
         if (state->visited[i] == planet_id)
+        {
             return 1;
+            break;
+        }
     }
     return 0;
 }
 
-void add_visited(ShipState *state, unsigned int planet_id)
+void clearCands(ShipState *state)
 {
-    if (state->num_visited == state->capacity)
+    for (int i = 0; i < state->candConn; i++)
     {
-        state->capacity *= 2;
-        state->visited = realloc(state->visited, sizeof(unsigned int) * state->capacity);
+        state->candDists[i] = 0;
+        state->candPlanets[i] = 0;
     }
-    state->visited[state->num_visited++] = planet_id;
+    state->candIndex = 0;
 }
 
+/**
+ * ! algorithim
+ * keeps jumping to the next planet if it is closer to the mixer
+ * and will "look around" to find a planet that is closer if it runs into a deadend and if all else fails it will jump to a random planet
+ * rinse and repeat
+ * ? flaws: no backtracking, depends on luck
+ */
 ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num_connections, double distance_from_mixer, void *ship_state)
 {
     ShipState *state;
     if (ship_state == NULL)
     {
-        state = init_ship_state();
+        state = malloc(sizeof(ShipState)); // will only be storing one ShipState at a time everytime this method is run
+        state->visited = malloc(sizeof(unsigned int) * MAX_PLANETS);
+        state->jumpNo = 0;
+        state->allPlanets = MAX_PLANETS;
+        state->prevDist = distance_from_mixer;
+
+        state->candPlanets = malloc(sizeof(unsigned int) * num_connections);
+        state->candDists = malloc(sizeof(unsigned int) * num_connections);
+        state->candIndex = 0;
+        state->candConn = num_connections;
     }
     else
     {
         state = (ShipState *)ship_state;
     }
 
-    add_visited(state, crt_planet);
+    unsigned int next_planet = RAND_PLANET;
 
-    unsigned int next_planet = crt_planet; // Stay on current planet if no unvisited connection is closer
-    double min_distance = distance_from_mixer;
+    state->visited[state->jumpNo] = crt_planet;
+    crt_planet = crt_planet;
 
-    // The game should ideally recognize the treasure planet as found when distance_from_mixer is zero.
-    // Ensure the game's logic checks for this condition correctly.
-    if (distance_from_mixer == 0)
+    for (int i = 0; i < num_connections; i++)
     {
-        // Logic to handle finding the treasure planet
-        // This could involve setting a specific next_planet value or triggering a game win condition
-        ShipAction action;
-        action.next_planet = crt_planet;
-        action.ship_state = state;
-        return action;
-    }
-
-    for (int i = 0; i < num_connections; ++i)
-    {
-        if (!is_visited(state, connections[i]))
+        if (is_visited(connections[i], state) == 0 && abs(distance_from_mixer) < abs(state->prevDist))
         {
-            // Since we're hypothesizing about the distances from these connections to the mixer,
-            // and we don't have direct access to these distances, we use the given logic to check:
-            // Assume a function or logic here to estimate distance; since we can't do that directly,
-            // the actual implementation needs to be based on the game's provided mechanisms.
-
-            // If a connection has a distance of 0 (hypothetically, if we could check it),
-            // that would indicate the treasure planet is found. This is a placeholder for such logic.
-            // Without direct access to each planet's distance to the mixer, we're limited in implementation.
-            next_planet = connections[i]; // Placeholder, assume we set next_planet based on some condition
+            printf("\nNEW PLANET");
+            next_planet = connections[i];
         }
     }
 
-    // Further logic here as needed...
+    state->prevDist = distance_from_mixer;
 
-    ShipAction action;
-    action.next_planet = next_planet;
-    action.ship_state = state;
-    return action;
+    printf("\nFrom space_explorer.c");
+    printf("\njumpNo : %u , ", state->jumpNo);
+    printf("\ncrt_planet : %u , ", crt_planet);
+
+    printf("\nprevDist : %u , ", state->prevDist);
+    printf("\ndistance_from_mixer : %d , ", distance_from_mixer);
+    printf("\nnum_connections : %d , ", num_connections);
+    printf("\nNearBy planets: ");
+
+    for (int i = 0; i < num_connections; i++)
+    {
+        printf("%d , ", connections[i]);
+    }
+    // printf("\nAll Visited planets: ");
+    // for (int i = 0; i < state->jumpNo; i++)
+    // {
+    //     printf("%u, ", state->visited[i]);
+    // }
+    printf("\n------------\n");
+
+    state->jumpNo++;
+
+    return (ShipAction){next_planet, state};
 }
