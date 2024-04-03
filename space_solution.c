@@ -10,11 +10,6 @@ typedef struct ship_state
     unsigned int jumpNo;
     unsigned int allPlanets;
     double prevDist;
-
-    unsigned int *candPlanets;
-    unsigned int *candDists;
-    unsigned int candIndex;
-    unsigned int candConn;
 } ShipState;
 
 #define MAX_PLANETS 500 // for the sake for argument allocated space for 500 planets should be more than enough
@@ -32,22 +27,12 @@ unsigned int is_visited(unsigned int planet_id, ShipState *state)
     return 0;
 }
 
-void clearCands(ShipState *state)
-{
-    for (int i = 0; i < state->candConn; i++)
-    {
-        state->candDists[i] = 0;
-        state->candPlanets[i] = 0;
-    }
-    state->candIndex = 0;
-}
-
 /**
  * ! algorithim
  * keeps jumping to the next planet if it is closer to the mixer
- * and will "look around" to find a planet that is closer if it runs into a deadend and if all else fails it will jump to a random planet
- * rinse and repeat
- * ? flaws: no backtracking, depends on luck
+ * and if there's a closer planet a random jump will be made
+ * todo: add in back tracking by "looking around" before the random jump is made
+ * ? flaws: no backtracking, depends on luck for the random jumping
  */
 ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num_connections, double distance_from_mixer, void *ship_state)
 {
@@ -59,15 +44,10 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
         state->jumpNo = 0;
         state->allPlanets = MAX_PLANETS;
         state->prevDist = distance_from_mixer;
-
-        state->candPlanets = malloc(sizeof(unsigned int) * num_connections);
-        state->candDists = malloc(sizeof(unsigned int) * num_connections);
-        state->candIndex = 0;
-        state->candConn = num_connections;
     }
     else
     {
-        state = (ShipState *)ship_state;
+        state = ship_state;
     }
 
     unsigned int next_planet = RAND_PLANET;
@@ -94,19 +74,22 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
     printf("\ndistance_from_mixer : %d , ", distance_from_mixer);
     printf("\nnum_connections : %d , ", num_connections);
     printf("\nNearBy planets: ");
-
     for (int i = 0; i < num_connections; i++)
     {
         printf("%d , ", connections[i]);
     }
-    // printf("\nAll Visited planets: ");
-    // for (int i = 0; i < state->jumpNo; i++)
-    // {
-    //     printf("%u, ", state->visited[i]);
-    // }
+    printf("\nAll Visited planets: ");
+    for (int i = 0; i < state->jumpNo; i++)
+    {
+        printf("%u, ", state->visited[i]);
+    }
     printf("\n------------\n");
 
     state->jumpNo++;
 
-    return (ShipAction){next_planet, state};
+    // same thign but just longer
+    // ShipAction action;
+    // action.next_planet = next_planet;
+    // action.ship_state = state;
+    return (ShipAction){next_planet, state}; // nicer and shorter
 }
