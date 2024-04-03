@@ -10,6 +10,7 @@ typedef struct ship_state
     unsigned int jumpNo;
     unsigned int allPlanets;
     double prevDist;
+    double *allDists;
 } ShipState;
 
 #define MAX_PLANETS 500 // for the sake for argument allocated space for 500 planets should be more than enough
@@ -44,6 +45,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
         state->jumpNo = 0;
         state->allPlanets = MAX_PLANETS;
         state->prevDist = distance_from_mixer;
+        state->allDists = malloc(sizeof(unsigned int) * MAX_PLANETS);
     }
     else
     {
@@ -53,7 +55,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
     unsigned int next_planet = RAND_PLANET;
 
     state->visited[state->jumpNo] = crt_planet;
-    crt_planet = crt_planet;
+    state->allDists[state->jumpNo] = distance_from_mixer;
 
     for (int i = 0; i < num_connections; i++)
     {
@@ -61,6 +63,27 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
         {
             printf("\nNEW PLANET");
             next_planet = connections[i];
+            break;
+        }
+    }
+
+    // will look back to previous planets for a new route if there's no current shorter path
+    // and will do a random jump as a last resort
+    if (next_planet == RAND_PLANET)
+    {
+        double oldDist;
+        int PlanetIndex;
+        for (int i = 1; i < state->jumpNo; i++)
+        {
+            PlanetIndex = state->jumpNo - i;
+            oldDist = state->allDists[PlanetIndex];
+            if (abs(oldDist) < abs(distance_from_mixer))
+            {
+                printf("BACKTRACKED");
+                next_planet = state->visited[PlanetIndex];
+                printf("\nPlanet to  @ jump: %d ", PlanetIndex);
+                break;
+            }
         }
     }
 
@@ -78,18 +101,14 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
     {
         printf("%d , ", connections[i]);
     }
-    printf("\nAll Visited planets: ");
-    for (int i = 0; i < state->jumpNo; i++)
-    {
-        printf("%u, ", state->visited[i]);
-    }
+    // printf("\nAll Visited planets: ");
+    // for (int i = 0; i < state->jumpNo; i++)
+    // {
+    //     printf("%u, ", state->visited[i]);
+    // }
     printf("\n------------\n");
 
     state->jumpNo++;
 
-    // same thign but just longer
-    // ShipAction action;
-    // action.next_planet = next_planet;
-    // action.ship_state = state;
     return (ShipAction){next_planet, state}; // nicer and shorter
 }
