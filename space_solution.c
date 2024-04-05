@@ -44,7 +44,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
         state->jumpNo = 0;
         state->allPlanets = MAX_PLANETS;
         state->prevDist = distance_from_mixer;
-        state->allDists = malloc(sizeof(unsigned int) * MAX_PLANETS);
+        state->allDists = malloc(sizeof(double) * MAX_PLANETS);
     }
     else
     {
@@ -54,7 +54,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
     unsigned int next_planet = RAND_PLANET;
 
     state->visited[state->jumpNo] = crt_planet;
-    state->allDists[state->jumpNo] = distance_from_mixer;
+    state->allDists[state->jumpNo] = abs(distance_from_mixer);
 
     for (int i = 0; i < num_connections; i++)
     {
