@@ -286,6 +286,14 @@ int main(int argc, char *argv[])
             }
         }
 
+        // printf("\nFrom space_explorer.c");                          // ! DEBUG
+        // printf("\ntreasure: %d", treasure->planet_id);              // ! DEBUG
+        // printf("\ncrt_id: %u", crt_id);                             // ! DEBUG
+        // printf("\nnext_planet: %u", next_action.next_planet);       // ! DEBUG
+        // printf("\ncrt_dist: %d", crt_dist);                         // ! DEBUG
+        // printf("\ncrt->num_connections: %d", crt->num_connections); // ! DEBUG
+        // printf("\n--------\n");                                     // ! DEBUG
+
         if (crt == treasure)
         {
             found_treasure = 1;
