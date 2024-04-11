@@ -5,7 +5,7 @@
 #include <math.h>
 #include <time.h>
 
-typedef struct
+typedef struct ship_state
 {
     unsigned int *visited;
     unsigned int jumpNo;
@@ -87,8 +87,6 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
         if (state->candIndex < state->candAmt)
         {
             state->candIndex++;
-            // ? the negative representations is confusing your code
-            // todo: find a way to convert the negative numbers into a postive representaiton using 2's compliment
             // create your own function to do this if you have to
             return (ShipAction){state->candPlanets[state->candIndex], state};
         }

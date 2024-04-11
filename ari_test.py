@@ -8,7 +8,7 @@ if len(sys.argv) < 2:
     sys.exit(1)
 EXE_PATH = sys.argv[1]
 
-TOTAL_RUNS = 5000
+TOTAL_RUNS = 10000
 if len(sys.argv) > 2:
     TOTAL_RUNS = int(sys.argv[2])
 THREADS = 32
