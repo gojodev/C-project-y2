@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        seed = 12; // Default seed if not provided
+        seed = 4; // Default seed if not provided
     }
     srand48(seed);
 
