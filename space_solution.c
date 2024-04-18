@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 #include <time.h>
 
 typedef struct ship_state
@@ -58,7 +57,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
     unsigned int next_planet = RAND_PLANET;
 
     state->visited[state->jumpNo] = crt_planet;
-    state->allDists[state->jumpNo] = abs(distance_from_mixer);
+    state->allDists[state->jumpNo] = distance_from_mixer;
 
     if (state->isMixerZero == 0)
     {
@@ -68,7 +67,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
 
     for (int i = 0; i < num_connections; i++)
     {
-        if (is_visited(connections[i], state) == 0 && abs(distance_from_mixer) <= abs(state->prevDist))
+        if (is_visited(connections[i], state) == 0 && distance_from_mixer <= state->prevDist)
         {
             next_planet = connections[i];
         }
@@ -90,7 +89,7 @@ ShipAction space_hop(unsigned int crt_planet, unsigned int *connections, int num
                 break;
             }
 
-            if (abs(oldDist) < abs(distance_from_mixer))
+            if (oldDist < distance_from_mixer)
             {
                 next_planet = state->visited[PlanetIndex];
                 // printf("\nBack Tracking to: %d , index: %d", next_planet, i);
